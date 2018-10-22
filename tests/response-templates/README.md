@@ -1,0 +1,1 @@
+This directory contains response templates for use with [apigee_mock_client](https://github.com/apigee/apigee-edge-drupal/tree/8.x-1.x/tests/modules/apigee_mock_client) module, a sub-module of [apigee_edge](https://github.com/apigee/apigee-edge-drupal/) used for offline testing.
