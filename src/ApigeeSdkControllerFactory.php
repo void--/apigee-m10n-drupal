@@ -22,6 +22,8 @@ use Apigee\Edge\Api\Management\Controller\OrganizationController;
 use Apigee\Edge\Api\Management\Controller\OrganizationControllerInterface;
 use Apigee\Edge\Api\Monetization\Controller\ApiPackageController;
 use Apigee\Edge\Api\Monetization\Controller\ApiPackageControllerInterface;
+use Apigee\Edge\Api\Monetization\Controller\ApiProductController;
+use Apigee\Edge\Api\Monetization\Controller\ApiProductControllerInterface;
 use Apigee\Edge\Api\Monetization\Controller\CompanyPrepaidBalanceController;
 use Apigee\Edge\Api\Monetization\Controller\CompanyPrepaidBalanceControllerInterface;
 use Apigee\Edge\Api\Monetization\Controller\DeveloperPrepaidBalanceController;
@@ -98,6 +100,17 @@ class ApigeeSdkControllerFactory implements ApigeeSdkControllerFactoryInterface 
     return
       new CompanyPrepaidBalanceController(
         $company->getLegalName(),
+        $this->org,
+        $this->client
+      );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function apiProductController(): ApiProductControllerInterface {
+    return
+      new ApiProductController(
         $this->org,
         $this->client
       );
