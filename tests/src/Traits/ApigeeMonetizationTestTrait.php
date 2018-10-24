@@ -167,12 +167,12 @@ trait ApigeeMonetizationTestTrait {
 
     $this->cleanup_queue[] = [
       'weight' => 99,
-      'callback' =>     function () {
+      'callback' => function () use ($account) {
         // Prepare for deleting the developer.
-        $this->queueDeveloperResponse($this->account);
-        $this->queueDeveloperResponse($this->account);
+        $this->queueDeveloperResponse($account);
+        $this->queueDeveloperResponse($account);
         // Delete it.
-        $this->account->delete();
+        $account->delete();
       }
     ];
 
