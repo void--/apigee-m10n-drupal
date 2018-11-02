@@ -22,6 +22,7 @@ use Apigee\Edge\Api\Management\Controller\OrganizationControllerInterface;
 use Apigee\Edge\Api\Monetization\Controller\ApiPackageControllerInterface;
 use Apigee\Edge\Api\Monetization\Controller\ApiProductControllerInterface;
 use Apigee\Edge\Api\Monetization\Controller\CompanyPrepaidBalanceControllerInterface;
+use Apigee\Edge\Api\Monetization\Controller\DeveloperAcceptedRatePlanController;
 use Apigee\Edge\Api\Monetization\Controller\DeveloperPrepaidBalanceControllerInterface;
 use Apigee\Edge\Api\Monetization\Controller\RatePlanControllerInterface;
 use Apigee\Edge\Api\Monetization\Entity\CompanyInterface;
@@ -35,7 +36,7 @@ use Drupal\user\UserInterface;
 interface ApigeeSdkControllerFactoryInterface {
 
   /**
-   * Gets and org controller.
+   * Creates an org controller.
    *
    * @return \Apigee\Edge\Api\Management\Controller\OrganizationControllerInterface
    *   The organization controller.
@@ -85,5 +86,14 @@ interface ApigeeSdkControllerFactoryInterface {
    *   The controller.
    */
   public function packageRatePlanController($package_id): RatePlanControllerInterface;
+
+  /**
+   * Creates a developer accepted rate plan controller.
+   *
+   * @param string $developer_email
+   *
+   * @return \Apigee\Edge\Api\Monetization\Controller\DeveloperAcceptedRatePlanController
+   */
+  public function developerAcceptedRatePlanController(string $developer_email): DeveloperAcceptedRatePlanController;
 
 }

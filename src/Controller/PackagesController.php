@@ -22,7 +22,6 @@ use Apigee\Edge\Api\Monetization\Controller\RatePlanControllerInterface;
 use Drupal\apigee_m10n\ApigeeSdkControllerFactoryInterface;
 use Drupal\apigee_m10n\Entity\RatePlan;
 use Drupal\apigee_m10n\Form\RatePlanConfigForm;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\user\UserInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -73,13 +72,13 @@ class PackagesController extends ControllerBase {
   }
 
   /**
-   * Redirect to the users purchased page.
+   * Redirect to the users subscriptions page.
    *
    * @return \Symfony\Component\HttpFoundation\RedirectResponse
    */
-  public function myPurchased(): RedirectResponse {
+  public function mySubscriptions(): RedirectResponse {
     return $this->redirect(
-      'apigee_monetization.purchased',
+      'apigee_monetization.subscriptions',
       ['user' => \Drupal::currentUser()->id()],
       ['absolute' => TRUE]
     );
@@ -97,23 +96,42 @@ class PackagesController extends ControllerBase {
   public function catalogPage(UserInterface $user = NULL) {
     // Get the package controller.
     $package_controller = $this->controller_factory->apiPackageController();
-    // Load purchased packages for comparison.
-    $packages = $package_controller->getAvailableApiPackagesByDeveloper($user->getEmail(), TRUE, TRUE);
+
+    // Initialize empty packages array in case API call fails.
+    $packages = [];
+
+    try {
+      // Load purchased packages for comparison.
+      $packages = $package_controller->getAvailableApiPackagesByDeveloper($user->getEmail(), TRUE, TRUE);
+    }
+    catch (\Exception $e) {
+      $this->loggerFactory->get('apigee_monetization')->error($e->getMessage());
+      $this->messenger->addError('Unable to retrieve packages: ' . $e->getMessage());
+    }
 
     // Get the view mode to use for rate plans.
     $view_mode = $this->config(RatePlanConfigForm::CONFIG_NAME)->get('product_rate_plan_view_mode');
     // Get an entity view builder for rate plans.
     $rate_plan_view_builder = $this->entityTypeManager()->getViewBuilder('rate_plan', $view_mode);
 
-    // Load plans for each package.
-    $plans = array_map(function($package) use ($rate_plan_view_builder) {
-      // Load the rate plans.
-      $package_rate_plans = RatePlan::loadPackageRatePlans($package->id());
-      if (!empty($package_rate_plans)) {
-        // Return a render-able list of rate plans.
-        return $rate_plan_view_builder->viewMultiple($package_rate_plans);
-      }
-    }, $packages);
+    // Initialize empty plans array in case API call fails.
+    $plans = [];
+
+    try {
+      // Load plans for each package.
+      $plans = array_map(function($package) use ($rate_plan_view_builder) {
+        // Load the rate plans.
+        $package_rate_plans = RatePlan::loadPackageRatePlans($package->id());
+        if (!empty($package_rate_plans)) {
+          // Return a render-able list of rate plans.
+          return $rate_plan_view_builder->viewMultiple($package_rate_plans);
+        }
+      }, $packages);
+    }
+    catch (\Exception $e) {
+      $this->loggerFactory->get('apigee_monetization')->error($e->getMessage());
+      $this->messenger->addError('Unable to retrieve plans: ' . $e->getMessage());
+    }
 
     return [
       'package_list' => [
@@ -125,7 +143,7 @@ class PackagesController extends ControllerBase {
   }
 
   /**
-   * Gets a list of purchased packages for this user.
+   * Gets a list of purchased subscriptions for this user.
    *
    * @param \Drupal\user\UserInterface|NULL $user
    *   The drupal user/developer.
@@ -133,8 +151,44 @@ class PackagesController extends ControllerBase {
    * @return array
    *   The pager render array.
    */
-  public function purchasedPage(UserInterface $user = NULL) {
-    return ['#markup' => $this->t('Hello World')];
+  public function subscriptionsPage(UserInterface $user = NULL) {
+
+    $subscriptions = [];
+
+    // Attempt to load accepted plans (i.e. subscriptions)
+    try {
+      $subscriptions = RatePlan::loadDeveloperSubscriptions($user->getEmail());
+    }
+    catch (\Exception $e) {
+      $this->loggerFactory->get('apigee_monetization')->error($e->getMessage());
+      $this->messenger->addError('Unable to retrieve subscriptions: ' . $e->getMessage());
+    }
+
+    $render = [
+      'subscription_list' => [
+        '#type' => 'table',
+        '#header' => [
+          'status' => 'asdf',
+          'package' => 'asdf',
+          'products' => 'asdf',
+          'plan' => 'asdf',
+          'start_date' => 'asdf',
+          'end_date' => 'asdf',
+          'plan_end_date' => 'asdf',
+          'renewal_date' => 'asdf',
+          'actions' => 'asdf'
+        ]
+      ]
+    ];
+
+    for ($i = 0; $i < count($subscriptions); $i++) {
+      $render['subscriptions_list']['#rows'][$i]['status'] = 'qwer';
+      $render['subscriptions_list']['#rows'][$i]['package'] = 'qwer';
+      $render['subscriptions_list']['#rows'][$i]['products'] = 'qwer';
+    }
+
+    return $render;
+
   }
 
   /**
