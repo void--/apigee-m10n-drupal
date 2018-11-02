@@ -17,3 +17,8 @@ services:
     class: Drupal\apigee_m10n\TwigExtension\FormatCurrencyTwigExtension
     tags:
     - { name: twig.extension }
+  apigee_m10n.locale_get_display_name:
+    class: Drupal\apigee_m10n\TwigExtension\LocaleGetDisplayNameTwigExtension
+    tags:
+    - { name: twig.extension }
+

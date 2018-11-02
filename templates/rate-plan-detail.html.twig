@@ -38,7 +38,7 @@
   },
   {
     'label': "Country",
-    'value': detail.organization.country,
+    'value': detail.organization.country|apigee_m10n_locale_get_display_name,
   },
   {
     'label': "Currency",
