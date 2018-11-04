@@ -78,7 +78,7 @@ class PackagesController extends ControllerBase {
    */
   public function mySubscriptions(): RedirectResponse {
     return $this->redirect(
-      'apigee_monetization.subscriptions',
+      'entity.subscription.collection_by_developer',
       ['user' => \Drupal::currentUser()->id()],
       ['absolute' => TRUE]
     );
