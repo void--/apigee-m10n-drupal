@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright 2018 Google Inc.
  *
@@ -36,6 +37,9 @@ use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
 use GuzzleHttp\Psr7\Response;
 
+/**
+ * Trait ApigeeMonetizationTestTrait.
+ */
 trait ApigeeMonetizationTestTrait {
 
   use ApigeeEdgeTestTrait {
@@ -43,17 +47,19 @@ trait ApigeeMonetizationTestTrait {
   }
 
   /**
-   * @var \Drupal\apigee_mock_client\MockHandlerStack
-   *
    * The mock handler stack is responsible for serving queued api responses.
+   *
+   * @var \Drupal\apigee_mock_client\MockHandlerStack
    */
   protected $stack;
 
   /**
-   * @var \Drupal\apigee_edge\SDKConnectorInterface
+   * The SDK Connector.
    *
-   * The SDK Connector client which should have it's http client stack replaced
-   * with our mock.
+   * This client which should have it's http client stack replaced with our
+   * mock.
+   *
+   * @var \Drupal\apigee_edge\SDKConnectorInterface
    */
   protected $sdk_connector;
 
@@ -68,8 +74,9 @@ trait ApigeeMonetizationTestTrait {
    * The clean up queue.
    *
    * @var array
-   *   An associative array with a `callback` and a `weight` key. Some items will
-   *   need to be called before others which is the reason for the weight system.
+   *   An associative array with a `callback` and a `weight` key. Some items
+   *   will need to be called before others which is the reason for the weight
+   *   system.
    */
   protected $cleanup_queue;
 
@@ -79,8 +86,8 @@ trait ApigeeMonetizationTestTrait {
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function setUp() {
-    $this->stack              = $this->container->get('apigee_mock_client.mock_http_handler_stack');
-    $this->sdk_connector      = $this->container->get('apigee_edge.sdk_connector');
+    $this->stack = $this->container->get('apigee_mock_client.mock_http_handler_stack');
+    $this->sdk_connector = $this->container->get('apigee_edge.sdk_connector');
 
     $this->initAuth();
     // `::initAuth` has to happen before getting the controller factory.
@@ -117,8 +124,7 @@ trait ApigeeMonetizationTestTrait {
   }
 
   /**
-   * We override this function from `ApigeeEdgeTestTrait` so we can queue the
-   * appropriate response upon account creation.
+   * Overridden so we can queue the appropriate response upon account creation.
    *
    * {@inheritdoc}
    *
@@ -173,7 +179,7 @@ trait ApigeeMonetizationTestTrait {
         $this->queueDeveloperResponse($account);
         // Delete it.
         $account->delete();
-      }
+      },
     ];
 
     return $account;
@@ -267,7 +273,7 @@ trait ApigeeMonetizationTestTrait {
     $this->stack->queueFromResponseFile('get_supported_currency');
     $currency = $currency_controller->load('usd');
 
-    /** @var RatePlanInterface $rate_plan */
+    /** @var \Drupal\apigee_m10n\Entity\RatePlanInterface $rate_plan */
     $rate_plan = RatePlan::create([
       'advance'               => TRUE,
       'customPaymentTerm'     => TRUE,
@@ -280,7 +286,6 @@ trait ApigeeMonetizationTestTrait {
       'freemiumUnit'          => 1,
       'id'                    => strtolower($this->randomMachineName()),
       'isPrivate'             => 'false',
-      //'monetizationPackage'   => {},
       'name'                  => $this->randomMachineName(),
       'paymentDueDays'        => '30',
       'prorate'               => FALSE,
@@ -304,8 +309,8 @@ trait ApigeeMonetizationTestTrait {
           'ratePlanRates'             => [],
           "ratingParameter"           => "VOLUME",
           "type"                      => "RATECARD",
-        ])
-       ],
+        ]),
+      ],
       'recurringFee'          => '3.0000',
       'recurringStartUnit'    => '1',
       'recurringType'         => 'CALENDAR',
@@ -333,8 +338,10 @@ trait ApigeeMonetizationTestTrait {
      * @code
      */
     $rate_plan->getRatePlanDetails()[0]->setRatePlanRates([
-      'id'        => strtolower($this->randomMachineName()),
-      'rate'      => rand(5,20),
+      new RatePlanRateRateCard([
+        'id'        => strtolower($this->randomMachineName()),
+        'rate'      => rand(5,20),
+      ]),
     ]);
 
     // Remove the rate plan in the cleanup queue.
